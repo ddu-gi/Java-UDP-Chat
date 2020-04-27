@@ -1,29 +1,29 @@
 import javax.swing.*;
 
 public class ChatClient {
-	public static String getLoginID() {
-		String LoginID = "";
+	public static String getloginID() {
+		String loginID = "";
 		try {
-			while (LoginID.equals("")) {
-				LoginID = JOptionPane.showInputDialog("닉네임을 써주세요(중복된 닉네임 생성 불가)");
+			while (loginID.equals("")) {
+				loginID = JOptionPane.showInputDialog("닉네임을 써주세요(중복된 닉네임 생성 불가)");
 			}
 		} catch (NullPointerException e) {
 			System.exit(0);
 		}
-		return LoginID;
+		return loginID;
 	}
 
 	public static void main(String args[]) {
-		String id = getLoginID();
+		String id = getloginID();
 		try {
 			if (args.length == 0) {
 				ClientThread thread = new ClientThread();
 				thread.start();
-				thread.로그인요청(id);
+				thread.requestlogin(id);
 			} else if (args.length == 1) {
 				ClientThread thread = new ClientThread(args[0]);
 				thread.start();
-				thread.로그인요청(id);
+				thread.requestlogin(id);
 			}
 		} catch (Exception e) {
 			System.out.println(e);

@@ -7,12 +7,13 @@ import javax.swing.event.*;
 import javax.swing.border.*;
 
 class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, MouseListener, ChangeListener {
-	public JList roomInfo, waiterInfo;
-	private ClientThread wait_client_thread;
+	private ClientThread chat_client_thread;
 	private int room_Number;
 	private String password, select;
-	private boolean lock, isSelected;
+	private boolean isLock, isSelected;
+
 	private JLabel rooms, waiter, label;
+	public JList roomInfo, waiterInfo;
 	private JButton create, join, sendword, logout;
 	private Font font;
 	private JViewport view;
@@ -23,10 +24,10 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 	public WaitRoomDisplay(ClientThread thread) {
 		super("대기실");
 
-		wait_client_thread = thread;
+		chat_client_thread = thread;
 		room_Number = 0;
 		password = "0";
-		lock = false;
+		isLock = false;
 		isSelected = false;
 		font = new Font("돋움", Font.PLAIN, 12);
 
@@ -37,17 +38,17 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 
 		JPanel p = new JPanel();
 		p.setLayout(null);
-		p.setBounds(5, 10, 450, 215);
+		p.setBounds(5, 10, 460, 215);
 		p.setFont(font);
 		p.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), "대화방 목록"));
 
-		label = new JLabel("번호");
+		label = new JLabel("번 호");
 		label.setBounds(15, 25, 40, 20);
 		label.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		label.setFont(font);
 		p.add(label);
 
-		label = new JLabel("방 제 목");
+		label = new JLabel("제 목");
 		label.setBounds(55, 25, 210, 20);
 		label.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		label.setFont(font);
@@ -59,13 +60,13 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 		label.setFont(font);
 		p.add(label);
 
-		label = new JLabel("비번방");
+		label = new JLabel("공개여부");
 		label.setBounds(325, 25, 60, 20);
 		label.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		label.setFont(font);
 		p.add(label);
 
-		label = new JLabel("개 설 자");
+		label = new JLabel("생 성 자");
 		label.setBounds(385, 25, 58, 20);
 		label.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		label.setFont(font);
@@ -74,13 +75,13 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 		roomInfo = new JList();
 		roomInfo.setFont(font);
 		WaitListCellRenderer renderer = new WaitListCellRenderer();
-		JScrollPane jsp1 = new JScrollPane(roomInfo);
+		JScrollPane jspane1 = new JScrollPane(roomInfo);
 		roomInfo.addMouseListener(this);
 		renderer.setDefaultTab(20);
 		renderer.setTabs(new int[] { 40, 265, 285, 315, 375, 430 });
 		roomInfo.setCellRenderer(renderer);
-		jsp1.setBounds(15, 45, 430, 155);
-		p.add(jsp1);
+		jspane1.setBounds(15, 45, 430, 155);
+		p.add(jspane1);
 
 		c.add(p);
 
@@ -91,9 +92,9 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 
 		waiterInfo = new JList();
 		waiterInfo.setFont(font);
-		JScrollPane jspane2 = new JScrollPane(waiterInfo);
-		jspane2.setBounds(15, 25, 115, 175);
-		p.add(jspane2);
+		JScrollPane jaspan2 = new JScrollPane(waiterInfo);
+		jaspan2.setBounds(15, 25, 115, 175);
+		p.add(jaspan2);
 
 		c.add(p);
 
@@ -125,19 +126,26 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 
 		c.add(p);
 
-		create = new JButton("대화방개설");
+		create = new JButton("대화방 생성");
 		create.setFont(font);
 		create.setBounds(500, 250, 100, 30);
 		create.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		create.addActionListener(this);
 		c.add(create);
 
-		join = new JButton("대화방참여");
+		join = new JButton("대화방 참여");
 		join.setFont(font);
 		join.setBounds(500, 290, 100, 30);
 		join.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
 		join.addActionListener(this);
 		c.add(join);
+
+		sendword = new JButton("귓 속 말");
+		sendword.setFont(font);
+		sendword.setBounds(500, 330, 100, 30);
+		sendword.setBorder(new SoftBevelBorder(SoftBevelBorder.RAISED));
+		sendword.addActionListener(this);
+		c.add(sendword);
 
 		logout = new JButton("로 그 아 웃");
 		logout.setFont(font);
@@ -147,7 +155,7 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 		c.add(logout);
 
 		Dimension dim = getToolkit().getScreenSize();
-		setSize(640, 450);
+		setSize(640, 460);
 		setLocation(dim.width / 2 - getWidth() / 2, dim.height / 2 - getHeight() / 2);
 		show();
 
@@ -159,7 +167,7 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				wait_client_thread.로그아웃요청();
+				chat_client_thread.requestLogout();
 			}
 		});
 	}
@@ -169,7 +177,7 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 		message.setText("");
 		room_Number = 0;
 		password = "0";
-		lock = false;
+		isLock = false;
 		isSelected = false;
 		message.requestFocusInWindow();
 	}
@@ -184,10 +192,10 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 				String command = st.nextToken();
 				idTo = st.nextToken();
 				data = st.nextToken();
-				wait_client_thread.수신자요청(data, idTo);
+				chat_client_thread.requestSendWordTo(data, idTo);
 				message.setText("");
 			} else {
-				wait_client_thread.송신자요청(words);
+				chat_client_thread.requestSendWord(words);
 				message.requestFocusInWindow();
 			}
 		}
@@ -204,32 +212,32 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == create) {
-			CreateRoomDisplay createRoom = new CreateRoomDisplay(this, wait_client_thread);
+			CreateRoomDisplay createRoom = new CreateRoomDisplay(this, chat_client_thread);
 		} else if (ae.getSource() == join) {
 			if (!isSelected) {
-				JOptionPane.showMessageDialog(this, "입장할 방 선택", "대화방 입장.", JOptionPane.ERROR_MESSAGE);
-			} else if (lock && password.equals("0")) {
+				JOptionPane.showMessageDialog(this, "입장하고 싶은 방 선택 ", "대화방 입장.", JOptionPane.ERROR_MESSAGE);
+			} else if (isLock && password.equals("0")) {
 				if ((password = JOptionPane.showInputDialog("비밀번호 입력")) != null) {
 					if (!password.equals("")) {
-						wait_client_thread.방입장요청(room_Number, password);
+						chat_client_thread.requestEnterRoom(room_Number, password);
 						password = "0";
 					} else {
 						password = "0";
-						wait_client_thread.방입장요청(room_Number, password);
+						chat_client_thread.requestEnterRoom(room_Number, password);
 					}
 				} else {
 					password = "0";
 				}
 			} else {
-				wait_client_thread.방입장요청(room_Number, password);
+				chat_client_thread.requestEnterRoom(room_Number, password);
 			}
 		} else if (ae.getSource() == logout) {
-			wait_client_thread.로그아웃요청();
+			chat_client_thread.requestLogout();
 		} else if (ae.getSource() == sendword) {
 			String idTo, data;
-			if ((idTo = JOptionPane.showInputDialog("닉네임 입력")) != null) {
-				if ((data = JOptionPane.showInputDialog("메세지 입력")) != null) {
-					wait_client_thread.수신자요청(data, idTo);
+			if ((idTo = JOptionPane.showInputDialog("닉네임 입력 : ")) != null) {
+				if ((data = JOptionPane.showInputDialog("메세지 입력 :")) != null) {
+					chat_client_thread.requestSendWordTo(data, idTo);
 				}
 			}
 		}
@@ -242,7 +250,7 @@ class WaitRoomDisplay extends JFrame implements ActionListener, KeyListener, Mou
 		String roomName = st.nextToken();
 		int maxUser = Integer.parseInt(st.nextToken());
 		int user = Integer.parseInt(st.nextToken());
-		lock = st.nextToken().equals("비공개") ? true : false;
+		isLock = st.nextToken().equals("비공개") ? true : false;
 	}
 
 	public void stateChanged(ChangeEvent e) {

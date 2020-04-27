@@ -5,13 +5,13 @@ import java.awt.event.*;
 class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener {
 	private ClientThread client;
 	private String roomName, str_password;
-	private int roomMaxUser, lock;
+	private int 방최대사용자, isLock;
 
 	private JFrame main;
 	private Container c;
 	private JTextField tf;
 	private JPanel personPanel;
-	private JRadioButton person1, person2, person3, person4, llock, unllock;
+	private JRadioButton person1, person2, person3, person4, lock, unlock;
 	private JPasswordField password;
 	private JButton ok, cancle;
 
@@ -20,8 +20,8 @@ class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener 
 		main = frame;
 		setTitle("대화방 생성");
 		this.client = client;
-		lock = 0;
-		roomMaxUser = 2;
+		isLock = 0;
+		방최대사용자 = 2;
 		str_password = "0";
 
 		c = getContentPane();
@@ -73,15 +73,15 @@ class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener 
 		personPanel = new JPanel();
 		personPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 		group = new ButtonGroup();
-		unllock = new JRadioButton("공개");
-		unllock.setSelected(true);
-		unllock.addItemListener(this);
-		group.add(unllock);
-		llock = new JRadioButton("비공개");
-		llock.addItemListener(this);
-		group.add(llock);
-		personPanel.add(unllock);
-		personPanel.add(llock);
+		unlock = new JRadioButton("공개");
+		unlock.setSelected(true);
+		unlock.addItemListener(this);
+		group.add(unlock);
+		lock = new JRadioButton("비공개");
+		lock.addItemListener(this);
+		group.add(lock);
+		personPanel.add(unlock);
+		personPanel.add(lock);
 		personPanel.setBounds(10, 130, 280, 20);
 		c.add(personPanel);
 
@@ -111,6 +111,7 @@ class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener 
 		setSize(300, 300);
 		setLocation(dim.width / 2 - getWidth() / 2, dim.height / 2 - getHeight() / 2);
 		show();
+
 		addWindowListener(new WindowAdapter() {
 			public void windowActivated(WindowEvent e) {
 				tf.requestFocusInWindow();
@@ -125,22 +126,22 @@ class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener 
 	}
 
 	public void itemStateChanged(ItemEvent ie) {
-		if (ie.getSource() == unllock) {
-			lock = 0;
+		if (ie.getSource() == unlock) {
+			isLock = 0;
 			str_password = "0";
 			password.setText("");
 			password.setEditable(false);
-		} else if (ie.getSource() == llock) {
-			lock = 1;
+		} else if (ie.getSource() == lock) {
+			isLock = 1;
 			password.setEditable(true);
 		} else if (ie.getSource() == person1) {
-			roomMaxUser = 2;
+			방최대사용자 = 2;
 		} else if (ie.getSource() == person2) {
-			roomMaxUser = 3;
+			방최대사용자 = 3;
 		} else if (ie.getSource() == person3) {
-			roomMaxUser = 4;
+			방최대사용자 = 4;
 		} else if (ie.getSource() == person4) {
-			roomMaxUser = 5;
+			방최대사용자 = 5;
 		}
 	}
 
@@ -150,13 +151,13 @@ class CreateRoomDisplay extends JDialog implements ActionListener, ItemListener 
 				JOptionPane.showMessageDialog(main, "방제목을 입력하세요", "대화방 생성.", JOptionPane.ERROR_MESSAGE);
 			} else {
 				roomName = tf.getText();
-				if (lock == 1) {
+				if (isLock == 1) {
 					str_password = password.getText();
 				}
-				if (lock == 1 && str_password.equals("")) {
+				if (isLock == 1 && str_password.equals("")) {
 					JOptionPane.showMessageDialog(main, "비밀번호를 입력하세요", "대화방 생성.", JOptionPane.ERROR_MESSAGE);
 				} else {
-					client.방생성요청(roomName, roomMaxUser, lock, str_password);
+					client.requestCreateRoom(roomName, 방최대사용자, isLock, str_password);
 					dispose();
 				}
 			}
