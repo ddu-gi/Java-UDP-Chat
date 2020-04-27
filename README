@@ -1,8 +1,7 @@
 JChat
 -------------------------------------------------------------
-A simple UDP-based command line chat client in Java. 
 
-Instructions
--------------------------------------------------------------
-Start server by java ChatServer
-Start clients by java ChatClient <server_hostname>
+처음에 서버관련 코드 파일을 먼저 생성한 후에 
+채팅방에 이용되는 코드를 작업했었는데
+
+실수로 브랜치를 지워버려서 과정 없이 한번에 올라가게 됨...
